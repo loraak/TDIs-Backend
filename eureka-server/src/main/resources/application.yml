@@ -3,7 +3,7 @@ server:
 
 eureka:
   instance:
-    hostname: localhost
+    hostname: ${RAILWAY_PRIVATE_DOMAIN:localhost}
     prefer-ip-address: false
   client:
     register-with-eureka: false
