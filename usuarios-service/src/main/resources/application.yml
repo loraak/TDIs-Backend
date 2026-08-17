@@ -1,13 +1,13 @@
 server:
-  port: 8081
+  port: ${PORT:8081}
 
 spring:
   application:
     name: usuarios-service
   datasource:
-    url: jdbc:postgresql://localhost:5432/tdis_usuarios
-    username: postgres
-    password: postgres
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/tdis_usuarios}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:postgres}
     driver-class-name: org.postgresql.Driver
   jpa:
     defer-datasource-initialization: true
@@ -25,7 +25,7 @@ spring:
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:8761/eureka/
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka/}
   instance:
     prefer-ip-address: true
 

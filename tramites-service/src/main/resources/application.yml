@@ -1,5 +1,5 @@
 server:
-  port: 8083
+  port: ${PORT:8083}
 
 spring:
   application:
@@ -14,9 +14,9 @@ spring:
       include-binding-errors: always
       include-stacktrace: on_param
   datasource:
-    url: jdbc:postgresql://localhost:5432/tdis_tramites
-    username: postgres
-    password: postgres
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/tdis_tramites}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:postgres}
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
@@ -30,7 +30,7 @@ spring:
 eureka:
   client:
     "service-url":
-      defaultZone: http://localhost:8761/eureka/
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka/}
   instance:
     prefer-ip-address: true
 
@@ -43,4 +43,4 @@ feign:
 
 n8n:
   webhook:
-    url: http://192.168.1.188:5678/webhook-test/3df73d6f-6d77-4cda-9ccd-5bf25a85a17f
+    url: ${N8N_WEBHOOK_URL:http://192.168.1.188:5678/webhook-test/3df73d6f-6d77-4cda-9ccd-5bf25a85a17f}

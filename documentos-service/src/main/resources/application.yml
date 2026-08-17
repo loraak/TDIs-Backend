@@ -1,13 +1,13 @@
 server:
-  port: 8085
+  port: ${PORT:8085}
 
 spring:
   application:
     name: documentos-service
   datasource:
-    url: jdbc:postgresql://localhost:5432/tdis_documentos
-    username: postgres
-    password: postgres
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/tdis_documentos}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:postgres}
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
@@ -25,7 +25,7 @@ spring:
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:8761/eureka/
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka/}
   instance:
     prefer-ip-address: true
 
