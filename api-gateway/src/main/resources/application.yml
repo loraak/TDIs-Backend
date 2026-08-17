@@ -18,6 +18,7 @@ eureka:
   instance:
     prefer-ip-address: false
     hostname: ${RAILWAY_PRIVATE_DOMAIN:localhost}
+    instance-id: ${spring.application.name}:${random.value}
 
 jwt:
   secret: dGhpcyBpcyBhIHNlY3JldCBrZXkgZm9yIHRkaXMgcHJvamVjdCBhdXRvbWF0aW9uIDIwMjQ=

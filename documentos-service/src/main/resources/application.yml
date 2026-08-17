@@ -29,6 +29,7 @@ eureka:
   instance:
     prefer-ip-address: false
     hostname: ${RAILWAY_PRIVATE_DOMAIN:localhost}
+    instance-id: ${spring.application.name}:${random.value}
 
 documentos:
   upload-dir: uploads/documentos
