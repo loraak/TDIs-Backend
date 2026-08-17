@@ -22,47 +22,47 @@ public class GatewayConfig {
                 .path("/api/auth/login")
                 .filters(f -> f
                     .removeRequestHeader("Authorization"))
-                .uri("http://localhost:8081"))
+                .uri("lb://usuarios-service"))
             .route("auth-register-open", r -> r
                 .path("/api/auth/register")
                 .filters(f -> f
                     .removeRequestHeader("Authorization"))
-                .uri("http://localhost:8081"))
+                .uri("lb://usuarios-service"))
             .route("auth-register-externo-open", r -> r
                 .path("/api/auth/register-externo")
                 .filters(f -> f
                     .removeRequestHeader("Authorization"))
-                .uri("http://localhost:8081"))
+                .uri("lb://usuarios-service"))
             .route("auth-register-interno-open", r -> r
                 .path("/api/auth/register-interno")
                 .filters(f -> f
                     .removeRequestHeader("Authorization"))
-                .uri("http://localhost:8081"))
+                .uri("lb://usuarios-service"))
             .route("usuarios-service", r -> r
                 .path("/api/auth/**", "/api/usuarios/**", "/api/admin/**")
                 .filters(f -> f
                     .filter(jwtAuthFilter.apply(new JwtAuthFilter.Config())))
-                .uri("http://localhost:8081"))
+                .uri("lb://usuarios-service"))
             .route("catalogo-service", r -> r
                 .path("/api/catalogo/**")
                 .filters(f -> f
                     .filter(jwtAuthFilter.apply(new JwtAuthFilter.Config())))
-                .uri("http://localhost:8082"))
+                .uri("lb://catalogo-service"))
             .route("tramites-service", r -> r
                 .path("/api/solicitudes/**")
                 .filters(f -> f
                     .filter(jwtAuthFilter.apply(new JwtAuthFilter.Config())))
-                .uri("http://localhost:8083"))
+                .uri("lb://tramites-service"))
             .route("progreso-service", r -> r
                 .path("/api/progreso/**")
                 .filters(f -> f
                     .filter(jwtAuthFilter.apply(new JwtAuthFilter.Config())))
-                .uri("http://localhost:8084"))
+                .uri("lb://progreso-service"))
             .route("documentos-service", r -> r
                 .path("/api/documentos/**")
                 .filters(f -> f
                     .filter(jwtAuthFilter.apply(new JwtAuthFilter.Config())))
-                .uri("http://localhost:8085"))
+                .uri("lb://documentos-service"))
             .build();
     }
 }
