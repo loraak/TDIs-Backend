@@ -123,6 +123,10 @@ public class TramiteService {
         solicitud.setAsistenciaEsperada(request.getAsistenciaEsperada());
         solicitud.setAlumnosGeneranTdi(request.getAlumnosGeneranTdi());
         solicitud.setHorasEstimadas(request.getHorasEstimadas());
+        // Para PREVIA, usar horasEfectivas como horasEstimadas si no hay horasEstimadas
+        if (esPrevia && request.getHorasEfectivas() != null && (request.getHorasEstimadas() == null || request.getHorasEstimadas().isBlank())) {
+            solicitud.setHorasEstimadas(String.valueOf(request.getHorasEfectivas()));
+        }
         // Periodicidad y fechas para Solicitud Previa
         solicitud.setPeriodicidad(request.getPeriodicidad());
         solicitud.setFechaInicio(request.getFechaInicio());
@@ -137,6 +141,15 @@ public class TramiteService {
 
         solicitud.setEstado(EstadoSolicitud.EN_REVISION);
 
+        solicitud = solicitudRepository.save(solicitud);
+        return toDTO(solicitud);
+    }
+
+    @Transactional
+    public SolicitudDTO actualizarNombreArchivo(UUID solicitudId, String nombreArchivo) {
+        Solicitud solicitud = solicitudRepository.findById(solicitudId)
+                .orElseThrow(() -> new ResourceNotFoundException("Solicitud no encontrada"));
+        solicitud.setNombreArchivo(nombreArchivo);
         solicitud = solicitudRepository.save(solicitud);
         return toDTO(solicitud);
     }

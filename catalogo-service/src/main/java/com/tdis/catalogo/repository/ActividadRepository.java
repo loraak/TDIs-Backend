@@ -18,4 +18,7 @@ public interface ActividadRepository extends JpaRepository<Actividad, UUID> {
     List<Actividad> findByActivaTrueAndEstadoRevision(EstadoRevision estado);
     List<Actividad> findByEjeAndActivaTrueAndEstadoRevision(EjeFormativo eje, EstadoRevision estado);
     List<Actividad> findByCreadorId(UUID creadorId);
+
+    boolean existsByTituloIgnoreCase(String titulo);
+    boolean existsByTituloIgnoreCaseAndIdNot(String titulo, UUID id);
 }

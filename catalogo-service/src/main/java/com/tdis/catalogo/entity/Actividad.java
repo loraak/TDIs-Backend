@@ -92,6 +92,15 @@ public class Actividad {
     @Column(name = "creador_tipo", length = 20)
     private String creadorTipo;
 
+    @Column(name = "area", length = 100)
+    private String area;
+
+    @Column(name = "nombre_responsable", length = 200)
+    private String nombreResponsable;
+
+    @Column(name = "telefono_responsable", length = 50)
+    private String telefonoResponsable;
+
     @Column(name = "comentario_revision", columnDefinition = "TEXT")
     private String comentarioRevision;
 

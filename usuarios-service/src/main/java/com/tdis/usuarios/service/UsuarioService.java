@@ -6,6 +6,7 @@ import com.tdis.common.dto.RegisterInternoRequest;
 import com.tdis.common.dto.RegisterRequest;
 import com.tdis.common.dto.RegisterExternoRequest;
 import com.tdis.common.dto.UsuarioDTO;
+import com.tdis.common.enums.Division;
 import com.tdis.common.enums.TipoUsuario;
 import com.tdis.common.exception.BadRequestException;
 import com.tdis.common.exception.ResourceNotFoundException;
@@ -83,6 +84,11 @@ public class UsuarioService {
         usuario.setTipoUsuario(TipoUsuario.ALUMNO);
         usuario.setPassword(passwordEncoder.encode(request.getPassword()));
         usuario.setActivo(true);
+
+        if (request.getDivision() != null && !request.getDivision().isBlank()) {
+            String divisionNormalizada = normalizarDivision(request.getDivision());
+            usuario.setDivisiones(List.of(Division.valueOf(divisionNormalizada)));
+        }
 
         usuario = usuarioRepository.save(usuario);
 
@@ -215,7 +221,21 @@ public class UsuarioService {
                 usuario.getNombre(),
                 usuario.getApellidos(),
                 usuario.getTipoUsuario(),
+                usuario.getDivisiones(),
                 usuario.getActivo()
         );
+    }
+
+    private String normalizarDivision(String division) {
+        return division.toUpperCase()
+                .replace("Á", "A")
+                .replace("É", "E")
+                .replace("Í", "I")
+                .replace("Ó", "O")
+                .replace("Ú", "U")
+                .replace("Ñ", "N")
+                .replace(" ", "_")
+                .replace("-", "_")
+                .replace("INDUSTRIAL", "INDUSTRIAL_Y_NANOTECNOLOGIA");
     }
 }

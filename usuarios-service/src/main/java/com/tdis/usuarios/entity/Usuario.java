@@ -1,5 +1,6 @@
 package com.tdis.usuarios.entity;
 
+import com.tdis.common.enums.Division;
 import com.tdis.common.enums.TipoUsuario;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -7,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -37,6 +39,12 @@ public class Usuario {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private TipoUsuario tipoUsuario;
+
+    @ElementCollection(targetClass = Division.class, fetch = FetchType.EAGER)
+    @CollectionTable(name = "usuario_divisiones", joinColumns = @JoinColumn(name = "usuario_id"))
+    @Column(name = "division", nullable = false, length = 30)
+    @Enumerated(EnumType.STRING)
+    private List<Division> divisiones = List.of();
 
     @Column(nullable = false)
     private Boolean activo = true;

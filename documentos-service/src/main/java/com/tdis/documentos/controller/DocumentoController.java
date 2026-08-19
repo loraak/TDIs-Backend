@@ -23,8 +23,8 @@ public class DocumentoController {
     public ResponseEntity<Map<String, String>> subirArchivo(
             @PathVariable UUID solicitudId,
             @RequestParam("archivo") MultipartFile archivo) {
-        String nombre = documentoService.subirArchivo(solicitudId, archivo);
-        return ResponseEntity.ok(Map.of("nombreAlmacenado", nombre));
+        String[] resultado = documentoService.subirArchivo(solicitudId, archivo);
+        return ResponseEntity.ok(Map.of("nombreAlmacenado", resultado[0], "nombreOriginal", resultado[1]));
     }
 
     @GetMapping("/download/{solicitudId}")

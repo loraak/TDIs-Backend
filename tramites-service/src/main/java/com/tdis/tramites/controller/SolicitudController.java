@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -63,5 +64,11 @@ public class SolicitudController {
     public ResponseEntity<SolicitudDTO> revisar(@PathVariable UUID id,
                                                  @Valid @RequestBody RevisarSolicitudRequest request) {
         return ResponseEntity.ok(tramiteService.revisar(id, request));
+    }
+
+    @PutMapping("/{id}/nombre-archivo")
+    public ResponseEntity<SolicitudDTO> actualizarNombreArchivo(@PathVariable UUID id,
+                                                                 @RequestBody Map<String, String> body) {
+        return ResponseEntity.ok(tramiteService.actualizarNombreArchivo(id, body.get("nombreArchivo")));
     }
 }

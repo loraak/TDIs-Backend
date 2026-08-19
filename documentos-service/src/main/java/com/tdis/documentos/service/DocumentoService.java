@@ -46,7 +46,7 @@ public class DocumentoService {
     );
 
     @Transactional
-    public String subirArchivo(UUID solicitudId, MultipartFile archivo) {
+    public String[] subirArchivo(UUID solicitudId, MultipartFile archivo) {
         if (archivo.isEmpty()) {
             throw new BadRequestException("El archivo esta vacio");
         }
@@ -83,7 +83,7 @@ public class DocumentoService {
             archivoEntity.setMimeType(contentType);
             archivoRepository.save(archivoEntity);
 
-            return nombreAlmacenado;
+            return new String[]{nombreAlmacenado, nombreOriginal};
         } catch (IOException e) {
             throw new RuntimeException("Error al guardar el archivo", e);
         }

@@ -45,4 +45,4 @@ feign:
 
 n8n:
   webhook:
-    url: ${N8N_WEBHOOK_URL:http://192.168.1.188:5678/webhook-test/3df73d6f-6d77-4cda-9ccd-5bf25a85a17f}
+    url: ${N8N_WEBHOOK_URL:http://192.168.1.74:5678/webhook-test/3df73d6f-6d77-4cda-9ccd-5bf25a85a17f}

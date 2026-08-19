@@ -31,4 +31,10 @@ public class RegisterRequest {
     private String apellidos;
 
     private String tipo;
+    private String division;
+    private String programa;
+    private String grupo;
+    private String cuatrimestre;
+    private String turno;
+    private String tutor;
 }
