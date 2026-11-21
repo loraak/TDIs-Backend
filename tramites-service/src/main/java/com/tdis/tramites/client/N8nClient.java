@@ -4,9 +4,11 @@ import com.tdis.common.dto.AnalisisIAResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.Duration;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
@@ -15,10 +17,17 @@ import java.util.Map;
 @Component
 public class N8nClient {
 
-    private final RestTemplate restTemplate = new RestTemplate();
+    private final RestTemplate restTemplate;
 
     @Value("${n8n.webhook.url}")
     private String webhookUrl;
+
+    public N8nClient() {
+        SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
+        factory.setConnectTimeout(Duration.ofSeconds(5));   // tiempo máximo para conectar
+        factory.setReadTimeout(Duration.ofSeconds(60));     // tiempo máximo esperando la respuesta
+        this.restTemplate = new RestTemplate(factory);
+    }
 
     public AnalisisIAResponse analizarEvidencia(String nombreActividad, String descripcion,
                                                  byte[] imagenBytes, String nombreArchivo) {

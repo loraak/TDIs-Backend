@@ -156,6 +156,7 @@ public class TramiteService {
 
     @Transactional
     public SolicitudDTO analizarIA(UUID solicitudId) {
+        // 1) Leer de la BD (rápido)
         Solicitud solicitud = solicitudRepository.findById(solicitudId)
                 .orElseThrow(() -> new ResourceNotFoundException("Solicitud no encontrada"));
 
@@ -163,6 +164,7 @@ public class TramiteService {
             throw new BadRequestException("Solo se puede analizar solicitudes de evidencia");
         }
 
+        // 2) Llamadas externas (lentas) - aquí NO hay conexión a la BD ocupada
         byte[] imagenBytes;
         try {
             imagenBytes = documentosClient.descargarArchivoBytes(solicitudId);
@@ -192,15 +194,13 @@ public class TramiteService {
             } else {
                 solicitud.setEstado(EstadoSolicitud.REVISION_HUMANA);
             }
-
-        } catch (BadRequestException e) {
-            throw e;
         } catch (Exception e) {
             log.warn("Error en analisis IA: {}", e.getMessage());
             solicitud.setEstado(EstadoSolicitud.REVISION_HUMANA);
             solicitud.setAiMotivo("No fue posible conectar con el servicio de analisis IA.");
         }
 
+        // 3) Guardar en la BD (rápido). save() abre y cierra su propia transacción.
         solicitud = solicitudRepository.save(solicitud);
         return toDTO(solicitud);
     }

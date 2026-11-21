@@ -5,17 +5,7 @@ import com.tdis.catalogo.entity.Actividad;
 import com.tdis.catalogo.repository.ActividadRepository;
 import com.tdis.common.dto.ActividadDTO;
 import com.tdis.common.dto.SolicitudDTO;
-import com.tdis.common.enums.AsignaturaFormacion;
-import com.tdis.common.enums.CompetenciaReforzada;
-import com.tdis.common.enums.DimensionFormacion;
-import com.tdis.common.enums.EstadoRevision;
-import com.tdis.common.enums.EstadoSolicitud;
-import com.tdis.common.enums.EjeFormativo;
-import com.tdis.common.enums.NivelImpacto;
-import com.tdis.common.enums.Periodicidad;
-import com.tdis.common.enums.PublicoObjetivo;
-import com.tdis.common.enums.TipoEvidenciaRequerida;
-import com.tdis.common.enums.TipoLugar;
+import com.tdis.common.enums.*;
 import com.tdis.common.exception.BadRequestException;
 import com.tdis.common.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -130,16 +120,9 @@ public class CatalogoService {
         if (solicitud == null) {
             throw new ResourceNotFoundException("Solicitud no encontrada");
         }
-        if (EstadoSolicitud.RECHAZADA.name().equals(solicitud.getEstado())) {
+        if (solicitud.getEstado() == EstadoSolicitud.RECHAZADA) {
             throw new BadRequestException("No se puede convertir una solicitud rechazada");
         }
-
-        System.out.println("=== DEBUG crearDesdePrevia ===");
-        System.out.println("solicitudId: " + solicitudId);
-        System.out.println("solicitud.getEje(): " + solicitud.getEje());
-        System.out.println("solicitud.getPeriodicidad(): " + solicitud.getPeriodicidad());
-        System.out.println("solicitud.getFechaInicio(): " + solicitud.getFechaInicio());
-        System.out.println("puntosTdi param: " + puntosTdi);
 
         if (solicitud.getEje() == null || puntosTdi == null) {
             StringBuilder missing = new StringBuilder();
