@@ -18,12 +18,6 @@ jwt:
   secret: ${JWT_SECRET}
   expiration: ${JWT_EXPIRATION:86400000}
 
-# Si no existe ningún administrador, se crea uno con estos datos al arrancar.
-tdis:
-  admin:
-    email: ${ADMIN_EMAIL:}
-    password: ${ADMIN_PASSWORD:}
-
 # ---------- Cloud Run ----------
 # Sin Eureka: cada servicio se llama por su URL de Cloud Run.
 eureka:
@@ -31,6 +25,9 @@ eureka:
     enabled: false
 
 tdis:
+  admin:
+    email: ${ADMIN_EMAIL:}
+    password: ${ADMIN_PASSWORD:}
   gcp:
     # Agrega ID tokens de Google a las llamadas entre servicios
     auth: true
