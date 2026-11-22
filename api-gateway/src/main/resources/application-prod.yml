@@ -1,0 +1,25 @@
+# Perfil de producción: todo sale de variables de entorno.
+jwt:
+  secret: ${JWT_SECRET}
+  expiration: ${JWT_EXPIRATION:86400000}
+
+# Separados por coma, ej: https://tdis-frontend.vercel.app,https://tdis.midominio.mx
+cors:
+  allowed-origins: ${CORS_ALLOWED_ORIGINS}
+
+# ---------- Cloud Run ----------
+# Sin Eureka: cada servicio se llama por su URL de Cloud Run.
+eureka:
+  client:
+    enabled: false
+
+tdis:
+  gcp:
+    # Agrega ID tokens de Google a las llamadas entre servicios
+    auth: true
+  url:
+    usuarios: ${USUARIOS_URL}
+    catalogo: ${CATALOGO_URL}
+    tramites: ${TRAMITES_URL}
+    progreso: ${PROGRESO_URL}
+    documentos: ${DOCUMENTOS_URL}

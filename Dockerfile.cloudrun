@@ -1,0 +1,17 @@
+# Imagen para Cloud Run. Usa el .jar ya compilado por cloudbuild.yaml
+# (no vuelve a compilar), así las 6 imágenes se arman rápido.
+#   docker build -f Dockerfile.cloudrun --build-arg SERVICE=api-gateway .
+FROM eclipse-temurin:21-jre
+
+ARG SERVICE
+WORKDIR /app
+COPY ${SERVICE}/target/*.jar app.jar
+
+# Ajustes para contenedores chicos y arranque más rápido:
+#  - usar hasta 75% de la memoria que le dé Cloud Run
+#  - SerialGC: el más ligero para 1 vCPU
+#  - TieredStopAtLevel=1: compila menos al arrancar (arranque en frío más corto)
+ENV JAVA_TOOL_OPTIONS="-XX:MaxRAMPercentage=75 -XX:+UseSerialGC -XX:TieredStopAtLevel=1"
+
+# Cloud Run indica el puerto en la variable PORT (los application.yml ya la leen)
+ENTRYPOINT ["java", "-jar", "app.jar"]

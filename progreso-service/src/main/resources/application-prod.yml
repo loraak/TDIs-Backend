@@ -1,0 +1,21 @@
+# Perfil de producción: todo sale de variables de entorno.
+
+# ---------- Cloud Run ----------
+# Sin Eureka: cada servicio se llama por su URL de Cloud Run.
+eureka:
+  client:
+    enabled: false
+
+tdis:
+  gcp:
+    # Agrega ID tokens de Google a las llamadas entre servicios
+    auth: true
+  url:
+    catalogo: ${CATALOGO_URL}
+    tramites: ${TRAMITES_URL}
+    usuarios: ${USUARIOS_URL}
+
+# Más margen que en local: el servicio destino puede estar "dormido" (arranque en frío)
+spring.cloud.openfeign.client.config.default:
+  connect-timeout: 10000
+  read-timeout: 30000

@@ -1,0 +1,21 @@
+# Perfil local (por defecto).
+spring:
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/tdis_usuarios}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:postgres}
+  jpa:
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+  sql:
+    init:
+      # Usuarios de prueba (admin123, password123...). NUNCA en producción.
+      mode: always
+      data-locations: classpath:data-dev.sql
+
+# Secreto SOLO para desarrollo. En producción se usa JWT_SECRET (uno nuevo).
+jwt:
+  secret: dGhpcyBpcyBhIHNlY3JldCBrZXkgZm9yIHRkaXMgcHJvamVjdCBhdXRvbWF0aW9uIDIwMjQ=
+  expiration: 86400000

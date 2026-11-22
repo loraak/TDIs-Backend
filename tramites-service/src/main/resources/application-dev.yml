@@ -1,0 +1,14 @@
+# Perfil local (por defecto).
+spring:
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/tdis_tramites}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:postgres}
+  jpa:
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+  web:
+    error:
+      include-stacktrace: on_param

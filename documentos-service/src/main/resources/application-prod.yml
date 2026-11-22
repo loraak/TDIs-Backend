@@ -1,0 +1,30 @@
+# Perfil de producción: todo sale de variables de entorno.
+spring:
+  datasource:
+    url: ${DATABASE_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    # Cloud SQL chico (db-f1-micro) acepta ~25 conexiones en total para los 4 servicios
+    hikari:
+      maximum-pool-size: ${DB_POOL_SIZE:2}
+      minimum-idle: 1
+  jpa:
+    show-sql: false
+
+# ---------- Cloud Run ----------
+# Sin Eureka: cada servicio se llama por su URL de Cloud Run.
+eureka:
+  client:
+    enabled: false
+
+tdis:
+  gcp:
+    # Agrega ID tokens de Google a las llamadas entre servicios
+    auth: true
+  url:
+    tramites: ${TRAMITES_URL}
+
+# Más margen que en local: el servicio destino puede estar "dormido" (arranque en frío)
+spring.cloud.openfeign.client.config.default:
+  connect-timeout: 10000
+  read-timeout: 30000

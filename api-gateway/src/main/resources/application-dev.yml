@@ -1,0 +1,17 @@
+# Perfil local (por defecto).
+# Secreto SOLO para desarrollo. En producción se usa JWT_SECRET (uno nuevo).
+jwt:
+  secret: dGhpcyBpcyBhIHNlY3JldCBrZXkgZm9yIHRkaXMgcHJvamVjdCBhdXRvbWF0aW9uIDIwMjQ=
+  expiration: 86400000
+
+cors:
+  allowed-origins: http://localhost:4200
+
+# En local los servicios se encuentran por Eureka
+tdis:
+  url:
+    usuarios: lb://usuarios-service
+    catalogo: lb://catalogo-service
+    tramites: lb://tramites-service
+    progreso: lb://progreso-service
+    documentos: lb://documentos-service

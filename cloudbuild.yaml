@@ -1,0 +1,68 @@
+# Compila el backend y publica las 6 imágenes en Artifact Registry.
+# Uso (desde la raíz del repo):
+#   gcloud builds submit --config cloudbuild.yaml
+#
+# Eureka no se construye: en Cloud Run los servicios se llaman por URL.
+
+substitutions:
+  _REGION: us-central1
+  _REPO: tdis
+
+options:
+  dynamicSubstitutions: true
+  machineType: E2_HIGHCPU_8   # compila más rápido; se cobra por minuto de build
+
+steps:
+  # 1) Compilar todos los módulos una sola vez
+  - id: compilar
+    name: maven:3.9-eclipse-temurin-21
+    entrypoint: mvn
+    args:
+      - -B
+      - clean
+      - package
+      - -DskipTests
+      - -pl
+      - api-gateway,usuarios-service,catalogo-service,tramites-service,progreso-service,documentos-service
+      - -am
+
+  # 2) Una imagen por servicio (en paralelo)
+  - id: img-api-gateway
+    name: gcr.io/cloud-builders/docker
+    args: [build, -f, Dockerfile.cloudrun, --build-arg, SERVICE=api-gateway,
+           -t, '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/api-gateway:latest', .]
+    waitFor: [compilar]
+  - id: img-usuarios
+    name: gcr.io/cloud-builders/docker
+    args: [build, -f, Dockerfile.cloudrun, --build-arg, SERVICE=usuarios-service,
+           -t, '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/usuarios-service:latest', .]
+    waitFor: [compilar]
+  - id: img-catalogo
+    name: gcr.io/cloud-builders/docker
+    args: [build, -f, Dockerfile.cloudrun, --build-arg, SERVICE=catalogo-service,
+           -t, '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/catalogo-service:latest', .]
+    waitFor: [compilar]
+  - id: img-tramites
+    name: gcr.io/cloud-builders/docker
+    args: [build, -f, Dockerfile.cloudrun, --build-arg, SERVICE=tramites-service,
+           -t, '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/tramites-service:latest', .]
+    waitFor: [compilar]
+  - id: img-progreso
+    name: gcr.io/cloud-builders/docker
+    args: [build, -f, Dockerfile.cloudrun, --build-arg, SERVICE=progreso-service,
+           -t, '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/progreso-service:latest', .]
+    waitFor: [compilar]
+  - id: img-documentos
+    name: gcr.io/cloud-builders/docker
+    args: [build, -f, Dockerfile.cloudrun, --build-arg, SERVICE=documentos-service,
+           -t, '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/documentos-service:latest', .]
+    waitFor: [compilar]
+
+# 3) Subir las imágenes
+images:
+  - '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/api-gateway:latest'
+  - '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/usuarios-service:latest'
+  - '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/catalogo-service:latest'
+  - '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/tramites-service:latest'
+  - '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/progreso-service:latest'
+  - '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/documentos-service:latest'

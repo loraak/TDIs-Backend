@@ -1,0 +1,10 @@
+# Lo que NO se sube a Cloud Build (se compila allá)
+.git/
+.gitignore
+.startup-logs/
+**/target/
+uploads/
+.env
+*.log
+.idea/
+.vscode/

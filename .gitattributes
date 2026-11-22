@@ -1,0 +1,2 @@
+# Los scripts de despliegue corren en Linux (Cloud Shell): siempre con LF
+*.sh text eol=lf
