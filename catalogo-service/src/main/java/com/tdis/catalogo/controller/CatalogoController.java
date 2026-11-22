@@ -3,6 +3,7 @@ package com.tdis.catalogo.controller;
 import com.tdis.common.dto.ActividadDTO;
 import com.tdis.common.enums.EstadoRevision;
 import com.tdis.common.enums.EjeFormativo;
+import com.tdis.common.security.Acceso;
 import com.tdis.catalogo.service.CatalogoService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +23,12 @@ public class CatalogoController {
 
     @GetMapping
     public ResponseEntity<List<ActividadDTO>> listar(@RequestParam(required = false) Boolean todas,
-                                                     @RequestParam(required = false) EstadoRevision estadoRevision) {
+                                                     @RequestParam(required = false) EstadoRevision estadoRevision,
+                                                     @RequestHeader(value = Acceso.HEADER_TIPO, required = false) String tipo) {
+        // Ver actividades pendientes, rechazadas o inactivas es solo para admin
+        if (estadoRevision != null || Boolean.TRUE.equals(todas)) {
+            Acceso.exigirRol(tipo, Acceso.ADMIN);
+        }
         if (estadoRevision != null) {
             return ResponseEntity.ok(catalogoService.listarPorEstadoRevision(estadoRevision));
         }
@@ -38,7 +44,11 @@ public class CatalogoController {
     }
 
     @GetMapping("/creador/{creadorId}")
-    public ResponseEntity<List<ActividadDTO>> listarPorCreador(@PathVariable UUID creadorId) {
+    public ResponseEntity<List<ActividadDTO>> listarPorCreador(
+            @PathVariable UUID creadorId,
+            @RequestHeader(value = Acceso.HEADER_ID, required = false) String userId,
+            @RequestHeader(value = Acceso.HEADER_TIPO, required = false) String tipo) {
+        Acceso.exigirDuenoOAdmin(userId, tipo, creadorId);
         return ResponseEntity.ok(catalogoService.obtenerPorCreador(creadorId));
     }
 
@@ -48,7 +58,15 @@ public class CatalogoController {
     }
 
     @PostMapping
-    public ResponseEntity<ActividadDTO> crear(@Valid @RequestBody ActividadDTO dto) {
+    public ResponseEntity<ActividadDTO> crear(
+            @Valid @RequestBody ActividadDTO dto,
+            @RequestHeader(value = Acceso.HEADER_ID, required = false) UUID userId,
+            @RequestHeader(value = Acceso.HEADER_TIPO, required = false) String tipo) {
+        // El creador sale del token, no de lo que mande el frontend
+        if (!Acceso.esLlamadaInterna(tipo)) {
+            dto.setCreadorId(userId);
+            dto.setCreadorTipo(tipo);
+        }
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(catalogoService.crear(dto));
     }
@@ -80,9 +98,16 @@ public class CatalogoController {
 
     @PostMapping("/desde-previa/{solicitudId}")
     public ResponseEntity<ActividadDTO> crearDesdePrevia(@PathVariable UUID solicitudId,
-                                                          @RequestParam UUID creadorId,
-                                                          @RequestParam String creadorTipo,
-                                                          @RequestParam Integer puntosTdi) {
+                                                          @RequestParam(required = false) UUID creadorId,
+                                                          @RequestParam(required = false) String creadorTipo,
+                                                          @RequestParam Integer puntosTdi,
+                                                          @RequestHeader(value = Acceso.HEADER_ID, required = false) UUID userId,
+                                                          @RequestHeader(value = Acceso.HEADER_TIPO, required = false) String tipo) {
+        // El creador es el admin que la convierte (sale del token)
+        if (!Acceso.esLlamadaInterna(tipo)) {
+            creadorId = userId;
+            creadorTipo = tipo;
+        }
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(catalogoService.crearDesdePrevia(solicitudId, creadorId, creadorTipo, puntosTdi));
     }

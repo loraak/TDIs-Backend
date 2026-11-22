@@ -1,9 +1,14 @@
+# Configuración común. Lo que cambia entre local y producción está en:
+#   application-dev.yml  -> local (perfil por defecto)
+#   application-prod.yml -> producción (activar con SPRING_PROFILES_ACTIVE=prod)
 server:
   port: ${PORT:8083}
 
 spring:
   application:
     name: tramites-service
+  profiles:
+    default: dev
   servlet:
     multipart:
       max-file-size: 15MB
@@ -12,37 +17,32 @@ spring:
     error:
       include-message: always
       include-binding-errors: always
-      include-stacktrace: on_param
   datasource:
-    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/tdis_tramites}
-    username: ${DB_USERNAME:postgres}
-    password: ${DB_PASSWORD:postgres}
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
       ddl-auto: update
-    show-sql: true
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
-        format_sql: true
+  cloud:
+    openfeign:
+      client:
+        config:
+          default:
+            connect-timeout: 3000
+            read-timeout: 10000
 
 eureka:
   client:
-    "service-url":
+    service-url:
       defaultZone: ${EUREKA_URL:http://localhost:8761/eureka/}
   instance:
     prefer-ip-address: false
     hostname: ${RAILWAY_PRIVATE_DOMAIN:localhost}
     instance-id: ${spring.application.name}:${random.value}
 
-feign:
-  client:
-    config:
-      default:
-        connect-timeout: 3000
-        read-timeout: 5000
-
+# Vacío = sin IA: las evidencias quedan en "Requiere revisión" para el admin.
 n8n:
   webhook:
-    url: ${N8N_WEBHOOK_URL:http://192.168.1.74:5678/webhook-test/3df73d6f-6d77-4cda-9ccd-5bf25a85a17f}
+    url: ${N8N_WEBHOOK_URL:}

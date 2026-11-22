@@ -13,3 +13,6 @@ node_modules/
 uploads/
 .DS_Store
 Thumbs.db
+
+# Variables de entorno locales
+.env

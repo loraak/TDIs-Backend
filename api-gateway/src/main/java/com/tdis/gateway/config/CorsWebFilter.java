@@ -1,5 +1,6 @@
 package com.tdis.gateway.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpHeaders;
@@ -12,16 +13,22 @@ import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
 import reactor.core.publisher.Mono;
 
+import java.util.Arrays;
 import java.util.List;
 
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class CorsWebFilter implements WebFilter {
 
-    private static final List<String> ALLOWED_ORIGINS = List.of(
-            "http://localhost:4200",
-            "https://tdis-frontend.vercel.app"
-    );
+    /** Viene de cors.allowed-origins (dev: localhost:4200, prod: CORS_ALLOWED_ORIGINS). */
+    private final List<String> allowedOrigins;
+
+    public CorsWebFilter(@Value("${cors.allowed-origins}") String origins) {
+        this.allowedOrigins = Arrays.stream(origins.split(","))
+                .map(String::trim)
+                .filter(o -> !o.isEmpty())
+                .toList();
+    }
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
@@ -48,7 +55,6 @@ public class CorsWebFilter implements WebFilter {
     }
 
     private boolean isAllowedOrigin(String origin) {
-        return ALLOWED_ORIGINS.contains(origin)
-                || origin.matches("^https://tdis-frontend.*\\.vercel\\.app$");
+        return allowedOrigins.contains(origin);
     }
 }

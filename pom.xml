@@ -33,6 +33,7 @@
         <java.version>21</java.version>
         <spring-cloud.version>2025.1.2</spring-cloud.version>
         <jjwt.version>0.12.6</jjwt.version>
+        <cloud-sql-socket-factory.version>1.28.2</cloud-sql-socket-factory.version>
     </properties>
 
     <dependencyManagement>
@@ -65,6 +66,12 @@
                 <artifactId>jjwt-jackson</artifactId>
                 <version>${jjwt.version}</version>
                 <scope>runtime</scope>
+            </dependency>
+            <!-- Conector de Cloud SQL (solo se usa si la URL de la BD lo pide) -->
+            <dependency>
+                <groupId>com.google.cloud.sql</groupId>
+                <artifactId>postgres-socket-factory</artifactId>
+                <version>${cloud-sql-socket-factory.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

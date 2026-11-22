@@ -1,3 +1,6 @@
+# Configuración común. Lo que cambia entre local y producción está en:
+#   application-dev.yml  -> local (perfil por defecto)
+#   application-prod.yml -> producción (activar con SPRING_PROFILES_ACTIVE=prod)
 server:
   port: ${PORT:8089}
   servlet:
@@ -10,6 +13,8 @@ server:
 spring:
   application:
     name: api-gateway
+  profiles:
+    default: dev
   codec:
     max-in-memory-size: 15MB
   cloud:
@@ -25,7 +30,3 @@ eureka:
     prefer-ip-address: false
     hostname: ${RAILWAY_PRIVATE_DOMAIN:localhost}
     instance-id: ${spring.application.name}:${random.value}
-
-jwt:
-  secret: dGhpcyBpcyBhIHNlY3JldCBrZXkgZm9yIHRkaXMgcHJvamVjdCBhdXRvbWF0aW9uIDIwMjQ=
-  expiration: 86400000

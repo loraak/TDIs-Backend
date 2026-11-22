@@ -31,6 +31,11 @@ public class N8nClient {
 
     public AnalisisIAResponse analizarEvidencia(String nombreActividad, String descripcion,
                                                  byte[] imagenBytes, String nombreArchivo) {
+        if (webhookUrl == null || webhookUrl.isBlank()) {
+            // IA desactivada: directo a revisión del administrador
+            return sinAnalisis("El analisis con IA no esta configurado.");
+        }
+
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
@@ -51,12 +56,16 @@ public class N8nClient {
             return response.getBody();
         } catch (Exception e) {
             log.error("Error al llamar n8n webhook: {}", e.getMessage());
-            AnalisisIAResponse fallback = new AnalisisIAResponse();
-            fallback.setEstado("Revision Humana");
-            fallback.setMotivo("No fue posible conectar con el servicio de analisis IA.");
-            fallback.setVeredicto_modelo(null);
-            fallback.setFue_rechazado_por_modelo(false);
-            return fallback;
+            return sinAnalisis("No fue posible conectar con el servicio de analisis IA.");
         }
+    }
+
+    private AnalisisIAResponse sinAnalisis(String motivo) {
+        AnalisisIAResponse fallback = new AnalisisIAResponse();
+        fallback.setEstado("Revision Humana");
+        fallback.setMotivo(motivo);
+        fallback.setVeredicto_modelo(null);
+        fallback.setFue_rechazado_por_modelo(false);
+        return fallback;
     }
 }

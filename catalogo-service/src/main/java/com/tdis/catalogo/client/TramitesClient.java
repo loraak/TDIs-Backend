@@ -7,7 +7,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.UUID;
 
-@FeignClient(name = "tramites-service")
+// En local (url vacía) se resuelve por Eureka; en producción se usa la URL de Cloud Run.
+@FeignClient(name = "tramites-service", url = "${tdis.url.tramites:}")
 public interface TramitesClient {
 
     @GetMapping("/api/solicitudes/{id}")

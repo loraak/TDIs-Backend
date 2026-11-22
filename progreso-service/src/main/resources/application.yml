@@ -4,6 +4,8 @@ server:
 spring:
   application:
     name: progreso-service
+  profiles:
+    default: dev
 
 eureka:
   client:

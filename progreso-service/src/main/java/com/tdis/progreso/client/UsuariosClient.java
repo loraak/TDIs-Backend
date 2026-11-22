@@ -7,7 +7,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.UUID;
 
-@FeignClient(name = "usuarios-service")
+// En local (url vacía) se resuelve por Eureka; en producción se usa la URL de Cloud Run.
+@FeignClient(name = "usuarios-service", url = "${tdis.url.usuarios:}")
 public interface UsuariosClient {
 
     @GetMapping("/api/usuarios/matricula/{matricula}")

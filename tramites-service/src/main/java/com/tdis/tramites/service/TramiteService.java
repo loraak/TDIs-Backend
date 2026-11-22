@@ -63,6 +63,13 @@ public class TramiteService {
         return toDTO(solicitud);
     }
 
+    /** Solo el id del alumno dueño; sirve para validar permisos sin armar todo el DTO. */
+    public UUID obtenerAlumnoId(UUID solicitudId) {
+        return solicitudRepository.findById(solicitudId)
+                .map(Solicitud::getAlumnoId)
+                .orElseThrow(() -> new ResourceNotFoundException("Solicitud no encontrada"));
+    }
+
     @Transactional
     public SolicitudDTO crear(UUID alumnoId, CrearSolicitudRequest request) {
         UUID alumnoIdFinal = alumnoId;
@@ -154,9 +161,9 @@ public class TramiteService {
         return toDTO(solicitud);
     }
 
-    @Transactional
+    // Sin @Transactional: no queremos tener una conexión a la BD abierta
+    // mientras esperamos a la IA (puede tardar hasta 60 s).
     public SolicitudDTO analizarIA(UUID solicitudId) {
-        // 1) Leer de la BD (rápido)
         Solicitud solicitud = solicitudRepository.findById(solicitudId)
                 .orElseThrow(() -> new ResourceNotFoundException("Solicitud no encontrada"));
 
@@ -164,7 +171,12 @@ public class TramiteService {
             throw new BadRequestException("Solo se puede analizar solicitudes de evidencia");
         }
 
-        // 2) Llamadas externas (lentas) - aquí NO hay conexión a la BD ocupada
+        // Evita volver a correr la IA sobre algo que el admin ya aprobó o rechazó
+        if (solicitud.getEstado() != EstadoSolicitud.EN_REVISION
+                && solicitud.getEstado() != EstadoSolicitud.REVISION_HUMANA) {
+            throw new BadRequestException("Esta solicitud ya fue revisada");
+        }
+
         byte[] imagenBytes;
         try {
             imagenBytes = documentosClient.descargarArchivoBytes(solicitudId);
@@ -194,13 +206,13 @@ public class TramiteService {
             } else {
                 solicitud.setEstado(EstadoSolicitud.REVISION_HUMANA);
             }
+
         } catch (Exception e) {
             log.warn("Error en analisis IA: {}", e.getMessage());
             solicitud.setEstado(EstadoSolicitud.REVISION_HUMANA);
             solicitud.setAiMotivo("No fue posible conectar con el servicio de analisis IA.");
         }
 
-        // 3) Guardar en la BD (rápido). save() abre y cierra su propia transacción.
         solicitud = solicitudRepository.save(solicitud);
         return toDTO(solicitud);
     }

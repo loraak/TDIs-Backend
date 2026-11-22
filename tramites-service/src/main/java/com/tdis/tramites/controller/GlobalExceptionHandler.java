@@ -1,6 +1,7 @@
 package com.tdis.tramites.controller;
 
 import com.tdis.common.exception.BadRequestException;
+import com.tdis.common.exception.ForbiddenException;
 import com.tdis.common.exception.ResourceNotFoundException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -46,6 +47,16 @@ public class GlobalExceptionHandler {
         body.put("errors", fieldErrors);
         body.put("message", ex.getMessage());
         return ResponseEntity.badRequest().body(body);
+    }
+
+    @ExceptionHandler(ForbiddenException.class)
+    public ResponseEntity<Map<String, Object>> handleForbidden(ForbiddenException ex) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("timestamp", java.time.Instant.now().toString());
+        body.put("status", 403);
+        body.put("error", "Forbidden");
+        body.put("message", ex.getMessage());
+        return ResponseEntity.status(403).body(body);
     }
 
     @ExceptionHandler(Exception.class)
