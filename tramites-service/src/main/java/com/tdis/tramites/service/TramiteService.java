@@ -1,7 +1,6 @@
 package com.tdis.tramites.service;
 
 import com.tdis.common.dto.ActividadDTO;
-import com.tdis.common.dto.AnalisisIAResponse;
 import com.tdis.common.dto.CrearSolicitudRequest;
 import com.tdis.common.dto.RevisarSolicitudRequest;
 import com.tdis.common.dto.SolicitudDTO;
@@ -13,12 +12,14 @@ import com.tdis.common.exception.ResourceNotFoundException;
 import com.tdis.common.dto.UsuarioDTO;
 import com.tdis.tramites.client.CatalogoClient;
 import com.tdis.tramites.client.DocumentosClient;
-import com.tdis.tramites.client.N8nClient;
 import com.tdis.tramites.client.UsuariosClient;
 import com.tdis.tramites.entity.Solicitud;
+import com.tdis.tramites.ia.AnalizadorEvidencia;
+import com.tdis.tramites.ia.ResultadoIA;
 import com.tdis.tramites.repository.SolicitudRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,7 +35,15 @@ public class TramiteService {
     private final SolicitudRepository solicitudRepository;
     private final CatalogoClient catalogoClient;
     private final DocumentosClient documentosClient;
-    private final N8nClient n8nClient;
+    private final AnalizadorEvidencia analizadorEvidencia;
+
+    /** recomendar = la IA solo opina y el admin decide; automatico = aprueba/rechaza si está segura. */
+    @Value("${tdis.ia.modo:recomendar}")
+    private String modoIA;
+
+    /** En modo automático, confianza mínima para aprobar o rechazar sin humano. */
+    @Value("${tdis.ia.confianza-minima:0.85}")
+    private double confianzaMinima;
     private final UsuariosClient usuariosClient;
 
     public List<SolicitudDTO> listarPorAlumno(UUID alumnoId) {
@@ -184,33 +193,35 @@ public class TramiteService {
             throw new BadRequestException("No hay evidencia adjunta para analizar");
         }
 
+        ResultadoIA ia;
         try {
             ActividadDTO actividad = catalogoClient.obtenerActividad(solicitud.getActividadId());
-
-            AnalisisIAResponse ia = n8nClient.analizarEvidencia(
-                    actividad.getTitulo(),
-                    solicitud.getDescripcion(),
-                    imagenBytes,
-                    solicitud.getNombreArchivo()
-            );
-
-            solicitud.setAiEstado(ia.getEstado());
-            solicitud.setAiMotivo(ia.getMotivo());
-            solicitud.setAiDescripcionAnalisis(ia.getDescripcion_analisis());
-
-            String estadoIA = ia.getEstado();
-            if ("Aprobado".equals(estadoIA)) {
-                solicitud.setEstado(EstadoSolicitud.APROBADA);
-            } else if ("Rechazado".equals(estadoIA)) {
-                solicitud.setEstado(EstadoSolicitud.RECHAZADA);
-            } else {
-                solicitud.setEstado(EstadoSolicitud.REVISION_HUMANA);
-            }
-
+            ia = analizadorEvidencia.analizar(actividad, solicitud, imagenBytes);
         } catch (Exception e) {
             log.warn("Error en analisis IA: {}", e.getMessage());
+            ia = ResultadoIA.sinAnalisis("No fue posible analizar la evidencia con IA; la revisara un administrador.");
+        }
+
+        // Lo que opinó la IA siempre se guarda para que el admin lo vea
+        solicitud.setAiEstado(switch (ia.veredicto()) {
+            case APROBAR -> "Aprobado";
+            case RECHAZAR -> "Rechazado";
+            case REVISAR -> "Revision Humana";
+        });
+        solicitud.setAiMotivo(ia.confianza() > 0
+                ? ia.motivo() + String.format(" (confianza IA: %.0f%%)", ia.confianza() * 100)
+                : ia.motivo());
+        solicitud.setAiDescripcionAnalisis(ia.descripcionImagen());
+
+        // ¿La IA decide sola? Solo en modo automático y si está suficientemente segura
+        boolean decideSola = "automatico".equalsIgnoreCase(modoIA) && ia.confianza() >= confianzaMinima;
+        if (decideSola && ia.veredicto() == ResultadoIA.Veredicto.APROBAR) {
+            solicitud.setEstado(EstadoSolicitud.APROBADA);
+        } else if (decideSola && ia.veredicto() == ResultadoIA.Veredicto.RECHAZAR) {
+            solicitud.setEstado(EstadoSolicitud.RECHAZADA);
+            solicitud.setComentarioRechazo("Rechazada automaticamente: " + ia.motivo());
+        } else {
             solicitud.setEstado(EstadoSolicitud.REVISION_HUMANA);
-            solicitud.setAiMotivo("No fue posible conectar con el servicio de analisis IA.");
         }
 
         solicitud = solicitudRepository.save(solicitud);

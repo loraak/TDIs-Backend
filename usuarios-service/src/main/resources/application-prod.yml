@@ -25,6 +25,7 @@ eureka:
     enabled: false
 
 tdis:
+  # Si no existe ningún administrador, se crea uno con estos datos al arrancar.
   admin:
     email: ${ADMIN_EMAIL:}
     password: ${ADMIN_PASSWORD:}

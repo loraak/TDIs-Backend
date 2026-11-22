@@ -42,7 +42,24 @@ eureka:
     hostname: ${RAILWAY_PRIVATE_DOMAIN:localhost}
     instance-id: ${spring.application.name}:${random.value}
 
-# Vacío = sin IA: las evidencias quedan en "Requiere revisión" para el admin.
+# ---------- Análisis de evidencias con IA ----------
+tdis:
+  ia:
+    # ninguno (todo lo revisa el admin) | gemini | n8n
+    proveedor: ${IA_PROVEEDOR:ninguno}
+    # recomendar: la IA solo opina, el admin decide
+    # automatico: la IA aprueba/rechaza sola si su confianza >= confianza-minima
+    modo: ${IA_MODO:recomendar}
+    confianza-minima: ${IA_CONFIANZA_MINIMA:0.85}
+    gemini:
+      modelo: ${GEMINI_MODELO:gemini-3.1-flash-lite}
+      ubicacion: ${GEMINI_UBICACION:global}
+      # En Cloud Run: ID del proyecto (usa Vertex AI con la cuenta de servicio)
+      proyecto: ${GCP_PROJECT_ID:}
+      # Solo para probar en local con una key de AI Studio
+      api-key: ${GEMINI_API_KEY:}
+
+# Solo si proveedor = n8n
 n8n:
   webhook:
     url: ${N8N_WEBHOOK_URL:}

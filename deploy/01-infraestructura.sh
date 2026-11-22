@@ -22,7 +22,7 @@ echo "==> 1/7 Habilitando APIs (1-2 min)"
 gcloud services enable run.googleapis.com sqladmin.googleapis.com \
   artifactregistry.googleapis.com cloudbuild.googleapis.com \
   secretmanager.googleapis.com storage.googleapis.com \
-  iam.googleapis.com compute.googleapis.com
+  iam.googleapis.com compute.googleapis.com aiplatform.googleapis.com
 
 echo "==> 2/7 Repositorio de imágenes (Artifact Registry)"
 existe gcloud artifacts repositories describe "$REPO" --location="$REGION" || \
@@ -76,7 +76,7 @@ if ! existe gcloud iam service-accounts describe "$SA"; then
   gcloud iam service-accounts create "$SA_NAME" --display-name="TDIs Cloud Run"
   sleep 15 # dar tiempo a que la cuenta nueva sea visible para IAM
 fi
-for role in roles/cloudsql.client roles/secretmanager.secretAccessor roles/run.invoker; do
+for role in roles/cloudsql.client roles/secretmanager.secretAccessor roles/run.invoker roles/aiplatform.user; do
   gcloud projects add-iam-policy-binding "$PROJECT_ID" \
     --member="serviceAccount:$SA" --role="$role" --condition=None >/dev/null
 done

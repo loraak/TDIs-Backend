@@ -51,7 +51,7 @@ desplegar catalogo-service --no-allow-unauthenticated \
   --set-secrets="DB_PASSWORD=db-password:latest"
 
 desplegar tramites-service --no-allow-unauthenticated \
-  --set-env-vars="$BASE,DATABASE_URL=$(db_url tdis_tramites),DB_USERNAME=$DB_USER" \
+  --set-env-vars="$BASE,DATABASE_URL=$(db_url tdis_tramites),DB_USERNAME=$DB_USER,IA_PROVEEDOR=${IA_PROVEEDOR:-ninguno},IA_MODO=${IA_MODO:-recomendar},IA_CONFIANZA_MINIMA=${IA_CONFIANZA_MINIMA:-0.85},GCP_PROJECT_ID=$PROJECT_ID" \
   --set-secrets="DB_PASSWORD=db-password:latest"
 
 # El bucket se monta como carpeta /mnt/evidencias (solo hace falta la primera vez)
